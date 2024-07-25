@@ -108,3 +108,5 @@ add_custom_target(
         -Z0
     DEPENDS hscollider
 )
+
+install(TARGETS hscollider DESTINATION ${CMAKE_INSTALL_BINDIR})
