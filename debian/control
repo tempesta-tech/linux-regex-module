@@ -1,0 +1,15 @@
+Source: linux-regex
+Section: utils
+Priority: optional
+Maintainer: Tempeststa Technologies, Inc. <info@tempesta-tech.com>
+Build-Depends: cmake, debhelper-compat (= 13)
+Standards-Version: 4.6.1
+Homepage: http://tempesta-tech.com
+Vcs-Git: https://github.com/tempesta-tech/linux-regex-module.git
+Rules-Requires-Root: no
+
+Package: linux-regex
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}, libc6-dev
+Description: Tool for compiling Intel Hyperscan regular expressions

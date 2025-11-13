@@ -1,0 +1,5 @@
+linux-regex (1:5.4) noble; urgency=low
+
+  * Package of upstream version with no changes.
+
+ -- Tempesta Technologies Inc. <info@tempesta-tech.com>  Thu, 13 Nov 2025 13:29:00 +0200
