@@ -1,0 +1,62 @@
+#!/usr/bin/make -f
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+  NJOBS = -j$(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+endif
+
+configure-stamp:
+	dh_testdir
+	mkdir obj-$(DEB_HOST_MULTIARCH)
+	cd obj-$(DEB_HOST_MULTIARCH) && DEB_PYTHON_INSTALL_LAYOUT=deb cmake -DCMAKE_INSTALL_PREFIX=/usr \
+	-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_SYSCONFDIR=/etc -DCMAKE_INSTALL_LOCALSTATEDIR=/var \
+	-DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON -DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF \
+	-DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+	-DCMAKE_INSTALL_RUNSTATEDIR=/run -DCMAKE_SKIP_INSTALL_ALL_DEPENDENCY=ON "-GUnix Makefiles" \
+	-DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_LIBDIR=lib/$(DEB_HOST_MULTIARCH) ..
+
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
+build-stamp:  configure-stamp
+	dh_testdir
+
+	cd obj-$(DEB_HOST_MULTIARCH) && make $(NJOBS)
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f configure-stamp build-stamp
+	# Add here commands to clean up after the build process.
+	[ ! -f Makefile ] || $(MAKE) distclean
+	rm -f dftables testsavedregex
+	rm -rdf obj-$(DEB_HOST_MULTIARCH)
+	dh_autoreconf_clean
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+	dh_install obj-$(DEB_HOST_MULTIARCH)/bin/hscollider /usr/bin
+	dh_strip -a
+
+binary-arch: build install
+	dh_testdir -a
+	dh_testroot -a
+	dh_install -a
+
+	dh_installchangelogs -a CHANGELOG.md
+	dh_compress -a
+	dh_fixperms -a
+	dh_makeshlibs -a
+	dh_installdeb -a
+	dh_gencontrol -a
+	dh_builddeb -a
+
+binary-indep:
+
+binary: binary-arch binary-indep
+.PHONY: build clean binary-arch binary install
